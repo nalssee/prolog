@@ -44,11 +44,11 @@ Example: (relation-arity '(p a b c)) => 3"
 (defun compile-predicate (symbol arity clauses)
   "Compile all the clauses for a given symbol/arity
 into a single LISP function."
-  (let ((predicate (make-predicate symbol arity))
+  (let ((*predicate* (make-predicate symbol arity))
 	(parameters (make-parameters arity)))
     (compile
      (eval   
-      `(defun ,predicate (,@parameters cont)
+      `(defun ,*predicate* (,@parameters cont)
 	 .,(maybe-add-undo-bindings
 	    (mapcar #'(lambda (clause)
 		       (compile-clause parameters clause 'cont))

@@ -131,6 +131,23 @@
 	   (> x y))
       (funcall cont)))
 
+(defun >=/2 (x y cont)
+  (if (and (numberp (deref x))
+	   (numberp (deref y))
+	   (>= x y))
+      (funcall cont)))
+
+(defun </2 (x y cont)
+  (if (and (numberp (deref x))
+	   (numberp (deref y))
+	   (< x y))
+      (funcall cont)))
+
+(defun <=/2 (x y cont)
+  (if (and (numberp (deref x))
+	   (numberp (deref y))
+	   (<= x y))
+      (funcall cont)))
 
 
 
