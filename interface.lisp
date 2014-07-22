@@ -62,7 +62,7 @@
 	     #'(lambda (,svars ,cont)
 		 (let ,(loop for v in vars
 			  for i from 0 collect
-			    (list v `(deref (nth ,i ,svars))))
+			    (list v `(deref-exp (nth ,i ,svars))))
 		   
 		   ,@body
 		   (funcall ,cont))))

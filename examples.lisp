@@ -6,9 +6,23 @@
 
 (in-package :examples)
 
-(declaim #+sbcl(sb-ext:muffle-conditions style-warning))
+;; (declaim #+sbcl(sb-ext:muffle-conditions style-warning))
+;; (declaim #+sbcl(sb-ext:muffle-conditions sb-kernel:redefinition-warning))
+
+
+
 
 (clear-db)
+
+(<- (rev () ()))
+(<- (rev (?x . ?a) ?b)
+    (rev ?a ?c) 
+    (concat ?c (?x) ?b))
+
+(<- (concat () ?l ?l))
+(<- (concat (?x . ?a) ?b (?x . ?c))
+    (concat ?a ?b ?c))
+
 
 (<- (member ?item (?item . ?rest)))
 
@@ -68,27 +82,48 @@
 ;; (?- (likes ?x kim))
 ;; (?- (bagof ?who (likes Sandy ?who) ?bag))
 
-(<- (fib 1 1))
+
+;; recursive version
+;; (<- (fib 1 1))
+;; (<- (fib 0 0))
+;; (<- (fib ?n ?v)
+;;     (> ?n 0)
+;;     (is ?n1 (- ?n 1))
+;;     (fib ?n1 ?v1)
+;;     (is ?n2 (- ?n 2))
+;;     (fib ?n2 ?v2)
+;;     (is ?v (+ ?v1 ?v2)))
+
 (<- (fib 0 0))
-(<- (fib ?n ?v)
-    (> ?n 0)
-    (is ?n1 (- ?n 1))
-    (fib ?n1 ?v1)
-    (is ?n2 (- ?n 2))
-    (fib ?n2 ?v2)
-    (is ?v (+ ?v1 ?v2)))
+(<- (fib ?x ?y)
+    (> ?x 0)
+    (fib ?x ?y ?))
 
-(<- (small ?x) (or (member ?x (1 2 3))
-		   (member ?x (2 3 4))
-		   (member ?x (3 4 5))))
+(<- (fib 1 1 0))
+(<- (fib ?x ?y1 ?y2)
+    (> ?x 1)
+    (is ?x1 (- ?x 1))
+    (fib ?x1 ?y2 ?y3)
+    (is ?y1 (+ ?y2 ?y3)))
 
-(<- (foo ?x) (and (small ?x) (member ?x (2 1))))
+(<- (append () ?ys ?ys))
+(<- (append (?x . ?xs) ?ys (?x . ?zs))
+    (append ?xs ?ys ?zs))
+(<- (quicksort (?x . ?xs) ?ys)
+    (partition ?xs ?x ?littles ?bigs)
+    (quicksort ?littles ?ls)
+    (quicksort ?bigs ?bs)
+    (append ?ls (?x . ?bs) ?ys))
+(<- (quicksort () ()))
+(<- (partition (?x . ?xs) ?y (?x . ?ls) ?bs)
+    (<= ?x ?y)
+    (partition ?xs ?y ?ls ?bs))
+(<- (partition (?x . ?xs) ?y ?ls (?x . ?bs))
+    (> ?x ?y)
+    (partition ?xs ?y ?ls ?bs))
+(<- (partition () ?y () ()))
 
-(with-inference (zebra ?x ?y ?z)
-  (format t "~%~A ~A ~A" ?x ?y ?z))
 
-(with-inference (fib 10 ?x)
-  (format t "~%fib 10: ~A" ?x))
 
 
 
@@ -135,14 +170,23 @@
       (can-do-job (computer wizard) (computer technician))
       (can-do-job (computer programmer) (computer programmer trainee))
       (can-do-job (administration secretary) (administration big wheel))
-      (rule (lives-near ?person-1 ?person-2) (and (address ?person-1 (?town . ?rest-1))
-					      (address ?person-2 (?town . ?rest-2))
-					      (not (same ?person-1 ?person-2))))
-      (rule (same ?x ?x))
-      (rule (wheel ?person) (and (supervisor ?middle-manager ?person)
-			     (supervisor ?x ?middle-manager)))
-      (rule (outranked-by ?staff-person ?boss)
-       (or (supervisor ?staff-person ?boss)
+      (rule
+       (lives-near ?person-1 ?person-2)
+       (and
+	(address ?person-1 (?town . ?rest-1))
+	(address ?person-2 (?town . ?rest-2))
+	(not (same ?person-1 ?person-2))))
+      (rule
+       (same ?x ?x))
+      (rule
+       (wheel ?person)
+       (and
+	(supervisor ?middle-manager ?person)
+	(supervisor ?x ?middle-manager)))
+      (rule
+       (outranked-by ?staff-person ?boss)
+       (or
+	(supervisor ?staff-person ?boss)
 	(and (supervisor ?staff-person ?middle-manager)
 	     (outranked-by ?middle-manager ?boss)))))))
 
@@ -156,27 +200,40 @@
 
 (insert-microshaft-data-base)
 
-(with-inference (job ?x (computer . ?type))
-  (format t "~% ~A ~A" ?x ?type))
-(with-inference (and (job ?person (computer programmer))
-		     (address ?person ?where))
-  (format t "~% person: ~A where: ~A" ?person ?where))
-
-(with-inference (and (salary ?person ?amount)
-		     (> ?amount 30000))
-  (format t "~% person ~A amount: ~A" ?person ?amount))
-
-(with-inference (outranked-by ?x ?y)
-  (format t "~% ~A ~A" ?x ?y))
-
-(with-inference (and (lives-near ?x ?y) (outranked-by ?x ?y))
-  (format t "~A and ~A's boss ~A lives close together" (second ?x) (second ?x) (second ?y)))
-
-
+;; cut
 (<- (max ?x ?y ?x) (>= ?x ?y) !)
 (<- (max ?x ?y ?y))
 
-(with-inference (max 30 190 ?x)
-  (print ?x))
+
+(handler-bind ((style-warning #'muffle-warning))
+  (with-inference (zebra ?x ?y ?z)
+    (format t "~%~A ~A ~A" ?x ?y ?z))
+
+  (with-inference (quicksort (9 1 2 9 10 -2) ?x)
+    (format t "~%~A" ?x))
+  
+  
+  (with-inference (fib 100 ?x)
+    (format t "~%fib 100: ~A" ?x))
+
+  (with-inference (and (salary ?person ?amount)
+		       (> ?amount 30000))
+    (format t "~% person ~A amount: ~A" ?person ?amount))
+  (with-inference (job ?x (computer . ?type))
+    (format t "~% ~A ~A" ?x ?type))
+
+  (with-inference (and (job ?person (computer programmer))
+		       (address ?person ?where))
+    (format t "~% person: ~A where: ~A" ?person ?where))
+
+
+  (with-inference (max 30 190 ?x)
+    (print ?x))
+
+  (with-inference (quicksort (10 9 3 12 8) ?x)
+    (format t "~%~A" ?x))
+
+
+  )
 
 

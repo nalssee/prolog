@@ -9,8 +9,8 @@
 	   :dowith-prolog-vars/1
 	   :with-inference 
 	   
-	   ;; :deref-exp
 	   :bagof/3
+	   :setof/3
 	   :not/1
 	   :=/2
 	   :==/2
