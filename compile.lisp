@@ -280,6 +280,7 @@ then bind them to new vars"
 
 (defun self-cons (x) (cons x x))
 
+
 (def-prolog-compiler-macro = (goal body cont bindings)
   "Compile a goal which is a call to =."
   (let ((args (args goal)))
@@ -311,7 +312,35 @@ then bind them to new vars"
 		      (compile-body (list g) `#',fn
 				    bindings)))))))))
 
+(def-prolog-compiler-macro true (goal body cont bindings)
+  (declare (ignore goal))
+  (compile-body body cont bindings))
 
+(def-prolog-compiler-macro fail (goal body cont bindings)
+  (declare (ignore goal body cont bindings))
+  nil)
+
+
+(def-prolog-compiler-macro if (goal body cont bindings)
+  (let ((p-c-e (args goal)))
+    (if (= (length p-c-e) 2)
+	(destructuring-bind (p c) p-c-e
+	  (let ((fn (gensym "F")))
+	    `(flet ((,fn () ,(compile-body (cons c body)
+					   cont bindings)))
+	       (block nil
+		 ,(compile-body (list p) `#'(lambda () (funcall `#',fn) (return nil))
+				bindings)))))
+	(destructuring-bind (p c e) p-c-e
+	  (let ((fn (gensym "F")))
+	    `(flet ((,fn () ,(compile-body body cont bindings)))
+	       (block nil
+		 ,@(maybe-add-undo-bindings
+		    (list (compile-body (list p) `#'(lambda ()
+						      ,(compile-body (list c) `#',fn bindings)
+						      (return nil))
+					bindings)
+			  (compile-body (list e) `#',fn bindings))))))))))
 
 
 

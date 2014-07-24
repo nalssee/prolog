@@ -151,6 +151,26 @@
       (funcall cont)))
 
 
+;; (eval-when (:compile-toplevel :load-toplevel :execute)
+;;   (clear-db)
+;;   (<- (if ?test ?then) (if ?then ?else (fail)))
+;;   (<- (if ?test ?then ?else)
+;;       (call ?test)
+;;       !
+;;       (call ?then))
+;;   (<- (if ?test ?then ?else)
+;;       (call ?else)))
+
+
+
+
+
+
+
+
+
+
+
 
 
 

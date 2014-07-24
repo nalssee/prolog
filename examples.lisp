@@ -225,16 +225,15 @@
 
   
 ;; ==================================
-;; cut
+;; cut, 
 ;; ==================================
-(<- (max ?x ?y ?x) (>= ?x ?y) !)
-(<- (max ?x ?y ?y))
 
 
 (with-inference (max 30 190 ?x)
   (print ?x))
 
 
+;; SICP ch 4
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar microshaft-data-base
     '(
@@ -315,4 +314,54 @@
   (format t "~% person ~A amount: ~A" ?person ?amount))
 
 
+
+;; ====================================
+;; Cuts
+;; ====================================
+;; http://cs.union.edu/~striegnk/learn-prolog-now/html/node88.html
+(<- (p ?x) (a ?x))
+;; 
+(<- (p ?x) (b ?x) (c ?x) ! (d ?x) (e ?x))
+(<- (p ?x) (f ?x))
+
+(<- (a 1))
+(<- (b 1))
+(<- (c 1))
+
+(<- (b 2))
+(<- (c 2))
+(<- (d 2))
+(<- (e 2))
+
+(<- (f 3))
+
+
+(with-inference (p ?x)
+  (format t "~%~A" ?x))
+
+
+(<- (s ?x ?y) (q ?x ?y))
+(<- (s 0 0))
+(<- (q ?x ?y) (i ?x) ! (j ?y))
+(<- (i 1))
+(<- (i 2))
+(<- (j 1))
+(<- (j 2))
+(<- (j 3))
+
+(with-inference (s ?x ?y)
+  (format t "~% ~A ~A" ?x ?y))
+
+(<- (max ?x ?y ?x) (>= ?x ?y) !)
+(<- (max ?x ?y ?y))
+
+;;  paiprolog package fails in the following silly example
+(<- (max1 ?x ?y ?z ?k)
+    (if (<= ?x ?y)
+	(is ?z ?y)
+	(is ?z ?x))
+    (= ?k 10))
+
+(with-inference (max1 400 100 ?x ?k)
+  (format t "~% ~A ~A" ?x ?k))
 

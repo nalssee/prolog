@@ -12,7 +12,11 @@
 	   :read/1
 	   :write/1
 	   :call/1
+	   :var/1
 	   :nl/0
+
+	   :true
+	   :fail
 	   
 	   :bagof/3
 	   :setof/3
@@ -24,6 +28,10 @@
 	   :!
 	   :?
 	   :numberp/1
+	   :repeat/0
+	   :atom/1
+
+	   :if
 	   
 	   :>/2
 	   :>=/2
