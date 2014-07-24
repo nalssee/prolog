@@ -6,7 +6,8 @@
       (funcall cont)))
 
 (defun write/1 (exp cont)
-  (write (deref-exp exp) :pretty t)
+  (format t "~A" (deref-exp exp))
+  ;; (write (deref-exp exp) :pretty t)
   (funcall cont))
 
 (defun nl/0 (cont) (terpri) (funcall cont))

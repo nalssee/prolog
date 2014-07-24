@@ -52,7 +52,27 @@
   (format t "~&No.")
   (values))
 
+#+SBCL
+(defmacro with-inference (goal &body body)
+  (let ((vars (delete '? (variables-in goal)))
+	(svars (gensym "V"))
+	(cont (gensym "K")))
+    ;; top-level-query/0 is redefined every time a query is evaled
+    ;; So you get style warning in SBCL
+    `(handler-bind ((style-warning #'muffle-warning))
+       (setf (symbol-function 'dowith-prolog-vars/1)
+	     #'(lambda (,svars ,cont)
+		 ,(if (null vars)
+		      `(declare (ignore ,svars)))
+		 (let ,(loop for v in vars
+			  for i from 0 collect
+			    (list v `(deref-exp (nth ,i ,svars))))
+		   ,@body
+		   (funcall ,cont))))
+       (top-level-infer ',goal))))
 
+
+#-SBCL
 (defmacro with-inference (goal &body body)
   (let ((vars (delete '? (variables-in goal)))
 	(svars (gensym "V"))
@@ -60,6 +80,8 @@
     `(progn
        (setf (symbol-function 'dowith-prolog-vars/1)
 	     #'(lambda (,svars ,cont)
+		 ,(if (null vars)
+		      `(declare (ignore ,svars)))
 		 (let ,(loop for v in vars
 			  for i from 0 collect
 			    (list v `(deref-exp (nth ,i ,svars))))

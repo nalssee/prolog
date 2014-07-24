@@ -8,6 +8,11 @@
 	   :show-prolog-vars/2
 	   :dowith-prolog-vars/1
 	   :with-inference 
+
+	   :read/1
+	   :write/1
+	   :call/1
+	   :nl/0
 	   
 	   :bagof/3
 	   :setof/3
