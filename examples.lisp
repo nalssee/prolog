@@ -229,8 +229,7 @@
 ;; ==================================
 
 
-(with-inference (max 30 190 ?x)
-  (print ?x))
+
 
 
 ;; SICP ch 4
@@ -354,6 +353,9 @@
 
 (<- (max ?x ?y ?x) (>= ?x ?y) !)
 (<- (max ?x ?y ?y))
+
+(with-inference (max 30 190 ?x)
+  (print ?x))
 
 ;;  paiprolog package fails in the following silly example
 (<- (max1 ?x ?y ?z ?k)
