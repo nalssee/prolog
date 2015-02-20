@@ -17,7 +17,6 @@
   ;; let "top-level-prove" delete ?
   `(top-level-prove ',goals))
 
-
 (defun add-clause (clause)
   "Add a clause to the data base, indexed by head's predicte."
   ;; The predicate must be a non-variable symbol.
@@ -28,7 +27,6 @@
     (setf (get-pred pred 'clauses)
 	  (nconc (get-clauses pred) (list clause)))
     pred))
-
 
 (defun replace-?-vars (exp)
   "Replace any ? within exp with a var of the form ?123."
@@ -52,7 +50,6 @@
   (format t "~&No.")
   (values))
 
-#+SBCL
 (defmacro with-inference (goal &body body)
   (let ((vars (delete '? (variables-in goal)))
 	(svars (gensym "V"))
@@ -71,25 +68,6 @@
 		   (funcall ,cont))))
        (top-level-infer ',goal))))
 
-
-#-SBCL
-(defmacro with-inference (goal &body body)
-  (let ((vars (delete '? (variables-in goal)))
-	(svars (gensym "V"))
-	(cont (gensym "K")))
-    `(progn
-       (setf (symbol-function 'dowith-prolog-vars/1)
-	     #'(lambda (,svars ,cont)
-		 ,(if (null vars)
-		      `(declare (ignore ,svars)))
-		 (let ,(loop for v in vars
-			  for i from 0 collect
-			    (list v `(deref-exp (nth ,i ,svars))))
-		   
-		   ,@body
-		   (funcall ,cont))))
-       (top-level-infer ',goal))))
-
 (defun top-level-infer (goal)
   (clear-predicate 'top-level-query)
   (let ((vars (delete '? (variables-in goal))))
@@ -104,9 +82,6 @@
   (declare (ignore vars))
   (funcall cont))
 
-
-
-
 (defun show-prolog-vars/2 (var-names vars cont)
   "Display the variables, and prompt the user to see
 if we should continue. If not, return to the top level."
@@ -119,8 +94,6 @@ if we should continue. If not, return to the top level."
       (funcall cont)
       (throw 'top-level-prove nil)))
 
-
-
 (defun run-prolog (procedure cont)
   "Run a 0-ary prolog procedure with a given continuation."
   ;; First compile anything else that needs it
@@ -132,24 +105,17 @@ if we should continue. If not, return to the top level."
   (catch 'top-level-prove
     (funcall procedure cont)))
 
-
 (defun prolog-compile-symbols (&optional (symbols *uncompiled*))
   "Compile a list of Prolog symbols.
 By default, the list is all symbols that need it."
-
   ;; To remove warning messages.
   ;; Compile top-level-query last not first.
   (mapc #'prolog-compile symbols)
   (setf *uncompiled* (set-difference *uncompiled* symbols)))
 
-
 (defun ignore-1 (&rest args)
   (declare (ignore args))
   nil)
-
-
-
-
 
 (defun deref-exp (exp)
   "Build something equivalent to EXP with variables dereferenced."

@@ -11,7 +11,6 @@
                do (setf ,exp (var-binding ,exp)))
 	  ,exp))
 
-
 (defstruct (var (:constructor ? ())
 		(:print-function print-var))
   (name (incf *var-counter*))

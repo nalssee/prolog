@@ -123,8 +123,6 @@
 (defun atom/1 (x cont)
   (when (atom (deref x))
     (funcall cont)))
-
-
 ;;!
 (defun >/2 (x y cont)
   (if (and (numberp (deref x))
@@ -149,28 +147,4 @@
 	   (numberp (deref y))
 	   (<= x y))
       (funcall cont)))
-
-
-;; (eval-when (:compile-toplevel :load-toplevel :execute)
-;;   (clear-db)
-;;   (<- (if ?test ?then) (if ?then ?else (fail)))
-;;   (<- (if ?test ?then ?else)
-;;       (call ?test)
-;;       !
-;;       (call ?then))
-;;   (<- (if ?test ?then ?else)
-;;       (call ?else)))
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -26,7 +26,6 @@
       (prolog-compile
        symbol (clauses-with-arity clauses #'/= arity)))))
 
-
 (defun clauses-with-arity (clauses test arity)
   "Return all clauses whose head has given arity."
   (find-all arity clauses
@@ -63,16 +62,6 @@ into a single LISP function."
   "Return the symbol: symbol/arity."
   (symbol-1 symbol '/ arity))
 
-;; (defun compile-clause (parms clause cont)
-;;   "Transform away the head, and compile the resulting body."
-;;   (bind-unbound-vars
-;;    parms
-;;    (compile-body
-;;     (nconc
-;;      (mapcar #'make-= parms (args (clause-head clause)))
-;;      (clause-body clause))
-;;     cont)))
-
 (defun maybe-add-undo-bindings (compiled-exps)
   "Undo any bindings that need undoing.
 If there are any, bind the trail before we start."
@@ -96,27 +85,6 @@ then bind them to new vars"
 	exp)))
 
 (defun make-= (x y) `(= ,x ,y))
-
-;; (defun compile-body (body cont)
-;;   "Compile the body of a clause."
-;;   (if (null body)
-;;       `(funcall ,cont)
-;;       (let* ((goal (first body))
-;; 	     (macro (prolog-compiler-macro (predicate goal)))
-;; 	     (macro-val (if macro
-;; 			    (funcall macro goal (rest body) cont))))
-;; 	(if (and macro (not (eq macro-val :pass)))
-;; 	    macro-val
-;; 	    (compile-call
-;; 	     (make-predicate (predicate goal)
-;; 			     (relation-arity goal))
-;; 	     (mapcar #'(lambda (arg) (compile-arg arg))
-;; 		     (args goal))
-;; 	     (if (null (rest body))
-;; 		 cont
-;; 		 `#'(lambda ()
-;; 		      ,(compile-body (rest body) cont))))))))
-
 
 (defun compile-body (body cont bindings)
   "Compile the body of a clause."
@@ -159,23 +127,6 @@ then bind them to new vars"
   "Define a compiler macro for prolog"
   `(setf (get-pred ',name 'prolog-compiler-macro)
 	 #'(lambda ,arglist .,body)))
-
-;; (def-prolog-compiler-macro = (goal body cont)
-;;   (let ((args (args goal)))
-;;     (if (/= (length args) 2)
-;; 	:pass
-;; 	`(if ,(compile-unify (first args) (second args))
-;; 	     ,(compile-body body cont)))))
-
-
-;; (defun compile-unify (x y)
-;;   "Return code that tests if var and term unify."
-;;   `(unify! ,(compile-arg x) ,(compile-arg y)))
-
-
-
-
-
 
 (defun compile-unify (x y bindings)
   "Return 2 values: code to test if x and y unify,
@@ -242,20 +193,6 @@ then bind them to new vars"
         (or (follow-binding (cdr b) bindings)
             b))))
 
-
-
-
-;; (defun compile-arg (arg)
-;;   "Generate code for an argument to a goal in the body."
-;;   (cond ((eq arg '?) '(?))
-;; 	((variable-p arg) arg)
-;; 	((not (has-variable-p arg)) `',arg)
-;; 	((proper-listp arg)
-;; 	 `(list .,(mapcar #'compile-arg arg)))
-;; 	(t `(cons ,(compile-arg (first arg))
-;; 		  ,(compile-arg (rest arg))))))
-
-
 (defun compile-arg (arg bindings)
   "Generate code for an argument to a goal in the body."
   (cond ((eq arg '?) '(?))
@@ -280,7 +217,6 @@ then bind them to new vars"
 
 (defun self-cons (x) (cons x x))
 
-
 (def-prolog-compiler-macro = (goal body cont bindings)
   "Compile a goal which is a call to =."
   (let ((args (args goal)))
@@ -292,11 +228,8 @@ then bind them to new vars"
            code1
            (compile-body body cont bindings1))))))
 
-
-
 (def-prolog-compiler-macro and (goal body cont bindings)
   (compile-body (append (args goal) body) cont bindings))
-
 
 (def-prolog-compiler-macro or (goal body cont bindings)
   (let ((disjuncts (args goal)))
@@ -342,8 +275,6 @@ then bind them to new vars"
 					bindings)
 			  (compile-body (list e) `#',fn bindings))))))))))
 
-
-
 (defun compile-clause (parms clause cont)
   "Transform away the head, and compile the resulting body."
   (bind-unbound-vars
@@ -383,7 +314,6 @@ then bind them to new vars"
       (walk tree)
       seen-once)))
 	
-
 (defun has-variable-p (x)
   "Is ther a variable anywhere in the expression x?"
   (find-if-anywhere #'variable-p x))
